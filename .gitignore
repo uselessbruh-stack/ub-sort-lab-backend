@@ -2,8 +2,14 @@
 node_modules/
 
 # Build outputs
-dist-sorting/
 dist/
+
+# Exclude large executable files and build artifacts inside dist-sorting
+dist-sorting/**/*.exe
+dist-sorting/**/*.pdb
+dist-sorting/**/bin/
+dist-sorting/**/obj/
+dist-sorting/**/build/
 
 # Logs
 logs

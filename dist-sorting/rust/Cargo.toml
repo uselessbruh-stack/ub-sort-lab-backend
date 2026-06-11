@@ -1,0 +1,11 @@
+[package]
+name = "sorting_analyzer"
+version = "1.0.0"
+edition = "2021"
+
+[[bin]]
+name = "sorting"
+path = "SortingRust.rs"
+
+[profile.release]
+opt-level = 3

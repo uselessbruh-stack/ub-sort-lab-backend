@@ -70,14 +70,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const DIST_SORTING_PATH = path.join(__dirname, 'dist-sorting');
 
 // Language executables mapping
-// All languages use pre-compiled .exe, Java uses java -jar
+// Dynamically use .exe on Windows and extensionless binaries on Linux/macOS
+const isWindows = process.platform === 'win32';
+const ext = isWindows ? '.exe' : '';
+
 const LANGUAGES = {
-  c: { exe: path.join(DIST_SORTING_PATH, 'c', 'SortingC.exe') },
-  cpp: { exe: path.join(DIST_SORTING_PATH, 'cpp', 'SortingCpp.exe') },
-  python: { exe: path.join(DIST_SORTING_PATH, 'python', 'SortingPython.exe') },
-  go: { exe: path.join(DIST_SORTING_PATH, 'go', 'SortingGo.exe') },
-  rust: { exe: path.join(DIST_SORTING_PATH, 'rust', 'SortingRust.exe') },
-  csharp: { exe: path.join(DIST_SORTING_PATH, 'csharp', 'SortingCSharp.exe') },
+  c: { exe: path.join(DIST_SORTING_PATH, 'c', `SortingC${ext}`) },
+  cpp: { exe: path.join(DIST_SORTING_PATH, 'cpp', `SortingCpp${ext}`) },
+  python: { exe: path.join(DIST_SORTING_PATH, 'python', `SortingPython${ext}`) },
+  go: { exe: path.join(DIST_SORTING_PATH, 'go', `SortingGo${ext}`) },
+  rust: { exe: path.join(DIST_SORTING_PATH, 'rust', `SortingRust${ext}`) },
+  csharp: { exe: path.join(DIST_SORTING_PATH, 'csharp', `SortingCSharp${ext}`) },
   java: { jar: path.join(DIST_SORTING_PATH, 'java', 'SortingJava.jar') },
 };
 
@@ -127,9 +130,11 @@ async function executeSorting(language, algorithm, elements = []) {
     validateElements(elements);
   }
 
-  // Build command: use java -jar for Java, exe for everything else
+  // Build command: use java -jar for Java, python3 for Python on non-Windows, exe for others
   let cmd;
-  if (langConfig.jar) {
+  if (language === 'python' && !isWindows) {
+    cmd = `python3 "${path.join(DIST_SORTING_PATH, 'python', 'sorting.py')}" "${algorithm}"`;
+  } else if (langConfig.jar) {
     cmd = `java -jar "${langConfig.jar}" "${algorithm}"`;
   } else {
     cmd = `"${langConfig.exe}" "${algorithm}"`;
