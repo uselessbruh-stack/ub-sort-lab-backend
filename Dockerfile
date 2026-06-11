@@ -34,7 +34,7 @@ RUN mkdir -p /app/out/csharp && \
     cp /app/publish/SortingCSharp /app/out/csharp/SortingCSharp
 
 # Stage 5: Build Java JAR
-FROM openjdk:17-slim AS java-builder
+FROM eclipse-temurin:17-jdk AS java-builder
 WORKDIR /app
 COPY dist-sorting/java/Sorting.java ./java/
 RUN mkdir -p /app/out/java && \
