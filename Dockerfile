@@ -33,7 +33,17 @@ RUN mkdir -p /app/out/csharp && \
     dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o /app/publish && \
     cp /app/publish/SortingCSharp /app/out/csharp/SortingCSharp
 
-# Stage 5: Final runner image
+# Stage 5: Build Java JAR
+FROM openjdk:17-slim AS java-builder
+WORKDIR /app
+COPY dist-sorting/java/Sorting.java ./java/
+RUN mkdir -p /app/out/java && \
+    javac ./java/Sorting.java -d /app/out/java && \
+    echo "Main-Class: Sorting" > /app/out/java/manifest.txt && \
+    cd /app/out/java && \
+    jar cfm SortingJava.jar manifest.txt *.class
+
+# Stage 6: Final runner image
 FROM node:20-slim
 WORKDIR /app
 
@@ -49,9 +59,9 @@ RUN npm ci --omit=dev
 # Copy server code
 COPY server.js ./
 
-# Copy pre-compiled Java JAR and Python script
-COPY dist-sorting/java/SortingJava.jar ./dist-sorting/java/
+# Copy Python script and Java JAR compiled from the builder stage
 COPY dist-sorting/python/sorting.py ./dist-sorting/python/
+COPY --from=java-builder /app/out/java/SortingJava.jar ./dist-sorting/java/
 
 # Copy compiled binaries from previous stages
 COPY --from=cpp-builder /app/out/c/SortingC ./dist-sorting/c/
@@ -60,12 +70,20 @@ COPY --from=go-builder /app/out/go/SortingGo ./dist-sorting/go/
 COPY --from=rust-builder /app/out/rust/SortingRust ./dist-sorting/rust/
 COPY --from=csharp-builder /app/out/csharp/SortingCSharp ./dist-sorting/csharp/
 
+# Ensure all compiled binaries have executable permissions
+RUN chmod +x ./dist-sorting/c/SortingC \
+             ./dist-sorting/cpp/SortingCpp \
+             ./dist-sorting/go/SortingGo \
+             ./dist-sorting/rust/SortingRust \
+             ./dist-sorting/csharp/SortingCSharp
+
 # Expose server port
 EXPOSE 3000
 
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 
 # Run the app
 CMD ["npm", "start"]
