@@ -191,4 +191,4 @@ The backend utilizes Mongoose to interface with MongoDB.
 - **Environment Settings**: 
   - `NODE_ENV` = `production`
   - `PORT` = `3000` (exposed port)
-- **Live URL**: https://ub-sort-lab-backend-1.onrender.com
+- **Live URL**: https://ub-sort-lab-backend.onrender.com
