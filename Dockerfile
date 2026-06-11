@@ -4,7 +4,7 @@ WORKDIR /app
 COPY dist-sorting/c/sorting.c ./c/
 COPY dist-sorting/cpp/main.cpp ./cpp/
 RUN mkdir -p /app/out/c /app/out/cpp && \
-    gcc -O3 ./c/sorting.c -o /app/out/c/SortingC && \
+    gcc -O3 ./c/sorting.c -lm -o /app/out/c/SortingC && \
     g++ -O3 ./cpp/main.cpp -o /app/out/cpp/SortingCpp
 
 # Stage 2: Build Go binary

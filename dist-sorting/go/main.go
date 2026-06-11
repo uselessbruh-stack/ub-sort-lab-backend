@@ -7,22 +7,11 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
-	"syscall"
 	"time"
-	"unsafe"
-)
-
-var (
-	kernel32                = syscall.NewLazyDLL("kernel32.dll")
-	queryPerformanceCounter = kernel32.NewProc("QueryPerformanceCounter")
-	queryPerformanceFreq    = kernel32.NewProc("QueryPerformanceFrequency")
 )
 
 func getHighPrecisionTimeMs() float64 {
-	var counter, frequency int64
-	queryPerformanceFreq.Call(uintptr(unsafe.Pointer(&frequency)))
-	queryPerformanceCounter.Call(uintptr(unsafe.Pointer(&counter)))
-	return float64(counter) / float64(frequency) * 1000.0
+	return float64(time.Now().UnixNano()) / 1e6
 }
 
 const (
